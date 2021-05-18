@@ -12,7 +12,8 @@ export default class ReadStoryScreen extends React.Component {
     this.state={
       allStories:[],
       search : '',
-      lastVisibleStory:''
+      lastVisibleStory:'',
+      searchedStories :[]
     } 
 }
   componentDidMount=async()=>{
@@ -20,7 +21,8 @@ export default class ReadStoryScreen extends React.Component {
     //console.log(query);
     query.docs.map((doc)=>{
       this.setState({
-        allStories : []
+        allStories : [...this.state.allStories,doc.data()],
+        searchedStories : []
       })
     })
   }
@@ -29,65 +31,90 @@ export default class ReadStoryScreen extends React.Component {
       const story =await db.collection('Stories').where("title","==",text).get()
       story.docs.map((doc)=>{
         this.setState({
-          allStories : [...this.state.allStories,doc.data()]
-        })
-      })
-    
-  }
-  fetchMoreStories=async()=>{
-    var text = this.state.search
-      const transaction =await db.collection('Stories').where("title","==",text).get()
-      transaction.docs.map((doc)=>{
-        this.setState({
-          allStories : [...this.state.allStories,doc.data()],
-          lastVisibleStory : doc
+          searchedStories : [...this.state.searchedStories,doc.data()]
         })
       })
     
   }
   render (){
-  return (
-    
-    <SafeAreaProvider>
-    <View style={{backgroundColor:"pink",flex:1}}>
-    <Header backgroundColor = "black"
-      centerComponent={{ text: 'Story Hub', style: { color: 'white' } }} />
-      <View style = {styles.searchBar}>
-        <TextInput style={styles.bar}
-        placeholder = "Enter Story Title"
-        onChangeText = {(text)=>{
-          this.setState({
-            search : text
-          })
-        }}/>
-        <TouchableOpacity style ={styles.searchButton} onPress={()=>{
-          this.searchStory(this.state.search)
-        }}>
-          <Text> Search </Text>
-        </TouchableOpacity>
-      </View>
-      <FlatList
-      data = {this.state.allStories}
-      renderItem = {({item})=>(
-          <View style={{borderBottomWidth:2}}>
-            <Text style={{color:"red"}}>{"Title : "+item.title}</Text>
-          <Text style={{color:"white"}}>{"Author : "+item.author}</Text>
-          </View>)
-      }
-      keyExtractor = {
-        (item,index)=>{
-          index.toString()
-        }
-      }
-      onEndReached = {
-        this.fetchMoreStories()
-      }
-      onEndReachedThreshold = {0.7}
-  />
-    </View>
-    </SafeAreaProvider>
-    
-  );} 
+    if(this.state.search === ''){
+      return (
+        <SafeAreaProvider>
+        <View style={{backgroundColor:"pink",flex:1}}>
+        <Header backgroundColor = "black"
+          centerComponent={{ text: 'Story Hub', style: { color: 'white' } }} />
+          <View style = {styles.searchBar}>
+            <TextInput style={styles.bar}
+            placeholder = "Enter Story Title"
+            onChangeText = {(text)=>{
+              this.setState({
+                search : text
+              })
+            }}/>
+            <TouchableOpacity style ={styles.searchButton} onPress={()=>{
+              this.searchStory(this.state.search)
+            }}>
+              <Text> Search </Text>
+            </TouchableOpacity>
+          </View>
+          <FlatList
+          data = {this.state.allStories}
+          renderItem = {({item})=>(
+              <View style={{borderBottomWidth:2}}>
+                <Text style={{color:"red"}}>{"Title : "+item.title}</Text>
+              <Text style={{color:"white"}}>{"Author : "+item.author}</Text>
+              </View>)
+          }
+          keyExtractor = {
+            (item,index)=>{
+              index.toString()
+            }
+          }
+      />
+        </View>
+        </SafeAreaProvider>
+        
+      );
+    }else {
+      return (
+        <SafeAreaProvider>
+        <View style={{backgroundColor:"pink",flex:1}}>
+        <Header backgroundColor = "black"
+          centerComponent={{ text: 'Story Hub', style: { color: 'white' } }} />
+          <View style = {styles.searchBar}>
+            <TextInput style={styles.bar}
+            placeholder = "Enter Story Title"
+            onChangeText = {(text)=>{
+              this.setState({
+                search : text
+              })
+            }}/>
+            <TouchableOpacity style ={styles.searchButton} onPress={()=>{
+              this.searchStory(this.state.search)
+            }}>
+              <Text> Search </Text>
+            </TouchableOpacity>
+          </View>
+          <FlatList
+          data = {this.state.searchedStories}
+          renderItem = {({item})=>(
+              <View style={{borderBottomWidth:2}}>
+                <Text style={{color:"red"}}>{"Title : "+item.title}</Text>
+              <Text style={{color:"white"}}>{"Author : "+item.author}</Text>
+              </View>)
+          }
+          keyExtractor = {
+            (item,index)=>{
+              index.toString()
+            }
+          }
+      />
+        </View>
+        </SafeAreaProvider>
+        
+      );
+    }
+  }
 }
 const styles = StyleSheet.create({
   container:{
