@@ -48,7 +48,8 @@ export default class ReadStoryScreen extends React.Component {
             placeholder = "Enter Story Title"
             onChangeText = {(text)=>{
               this.setState({
-                search : text
+                search : text,
+                searchedStories :[]
               })
             }}/>
             <TouchableOpacity style ={styles.searchButton} onPress={()=>{
